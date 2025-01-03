@@ -2,10 +2,13 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { CreateUserDto } from './DTOs/create-user.dto';
+import { UpdateUserDto } from './DTOs/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -14,11 +17,26 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async create(user: User): Promise<User> {
+  async create(createUserDto: CreateUserDto) {
+    // Verificar si el correo electrónico ya está registrado
+    const existingUser = await this.usersRepository.findOne({
+      where: { email: createUserDto.email },
+    });
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
     try {
+      // Crear el nuevo usuario
+      const user = this.usersRepository.create(createUserDto);
       return await this.usersRepository.save(user);
     } catch (error) {
-      throw new InternalServerErrorException('Error creating user');
+      if (error.code === '23505') {
+        // Código de error de llave duplicada en PostgreSQL
+        throw new ConflictException('Email already registered');
+      }
+      console.error('Error creating user:', error.message);
+      throw new InternalServerErrorException('Error creating user in service');
     }
   }
 
@@ -43,6 +61,11 @@ export class UsersService {
       }
       throw new InternalServerErrorException('Error fetching user');
     }
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    await this.usersRepository.update(id, updateUserDto);
+    return this.usersRepository.findOne({ where: { id } });
   }
 
   async remove(id: string): Promise<User> {

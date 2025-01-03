@@ -24,12 +24,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-// import { MongooseModule } from '@nestjs/mongoose';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { TasksModule } from './tasks/tasks.module';
 import { typeOrmConfig } from './config/typeorm.config';
+import { mongooseConfig } from './config/mongoose.config';
+import { TestModule } from './tasks/test.module';
 
 @Module({
   imports: [
@@ -37,12 +39,10 @@ import { typeOrmConfig } from './config/typeorm.config';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync(typeOrmConfig),
-    // MongooseModule.forRoot('mongodb://localhost:27017/microtask_manager', {
-    //   useNewUrlParser: true,
-    //   useUnifiedTopology: true,
-    // }),
+    MongooseModule.forRoot(mongooseConfig.uri),
     UsersModule,
     TasksModule,
+    TestModule,
   ],
   controllers: [AppController],
   providers: [AppService],
