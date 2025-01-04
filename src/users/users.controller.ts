@@ -9,7 +9,7 @@ import {
   Body,
   Param,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { RemoveUserResponse, UsersService } from './users.service';
 import { CreateUserDto } from './DTOs/create-user.dto';
 // import { UpdateUserDto } from './DTOs/update-user.dto';
 import { User } from './entities/user.entity';
@@ -20,8 +20,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  // async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-  async create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     const response = await this.usersService.create(createUserDto);
     return response;
     // return 'prueba controlador';
@@ -46,7 +45,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<User> {
+  async remove(@Param('id') id: string): Promise<RemoveUserResponse> {
     return this.usersService.remove(id);
   }
 }

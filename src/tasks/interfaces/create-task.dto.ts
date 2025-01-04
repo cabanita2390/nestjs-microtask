@@ -1,7 +1,25 @@
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsBoolean,
+  IsDateString,
+} from 'class-validator';
+
 export class CreateTaskDto {
-  readonly title: string;
-  readonly description: string;
-  readonly deadline: Date;
-  readonly status: string;
-  readonly assignedTo?: string;
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  completed?: boolean;
+
+  @IsDateString()
+  @IsOptional()
+  deadline?: string;
 }

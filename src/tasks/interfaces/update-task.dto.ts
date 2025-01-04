@@ -1,7 +1,19 @@
+import { IsString, IsOptional, IsBoolean, IsDateString } from 'class-validator';
+
 export class UpdateTaskDto {
-  readonly title?: string;
-  readonly description?: string;
-  readonly deadline?: Date;
-  readonly status?: string;
-  readonly assignedTo?: string;
+  @IsString()
+  @IsOptional()
+  title?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  completed?: boolean;
+
+  @IsDateString()
+  @IsOptional()
+  deadline?: string;
 }

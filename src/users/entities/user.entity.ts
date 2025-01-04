@@ -1,28 +1,13 @@
-// import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
-// @Entity()
-// export class User {
-//   @PrimaryGeneratedColumn()
-//   id: string;
-
-//   @Column()
-//   name: string;
-
-//   @Column({ unique: true })
-//   email: string;
-
-//   @Column()
-//   password: string;
-// }
-
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  OneToMany,
   CreateDateColumn,
   BeforeInsert,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Task } from '../../tasks/entities/task.entity';
 
 @Entity('users')
 export class User {
@@ -43,6 +28,9 @@ export class User {
 
   @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
+
+  @OneToMany(() => Task, (task) => task.user, { eager: true })
+  tasks: Task[];
 
   @BeforeInsert()
   async hashPassword() {

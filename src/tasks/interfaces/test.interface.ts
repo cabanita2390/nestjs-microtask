@@ -1,5 +1,5 @@
-import { Document } from 'mongoose';
-
-export interface Test extends Document {
-  readonly name: string;
+export interface Test {
+  id: string;
+  name: string;
+  description?: string;
 }
