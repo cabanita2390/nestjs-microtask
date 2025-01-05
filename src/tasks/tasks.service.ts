@@ -6,9 +6,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
-import { User } from '../users/entities/user.entity';
 import { CreateTaskDto } from './interfaces/create-task.dto';
 import { UpdateTaskDto } from './interfaces/update-task.dto';
+import { User } from '../users/entities/user.entity';
+import { AuditService } from 'src/audit/audit.service';
 
 @Injectable()
 export class TasksService {
@@ -17,6 +18,7 @@ export class TasksService {
     private tasksRepository: Repository<Task>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private auditService: AuditService,
   ) {}
 
   async create(createTaskDto: CreateTaskDto, userId: string): Promise<Task> {
@@ -29,7 +31,17 @@ export class TasksService {
       }
 
       const task = this.tasksRepository.create({ ...createTaskDto, user });
-      return await this.tasksRepository.save(task);
+      const savedTask = await this.tasksRepository.save(task);
+
+      await this.auditService.createAudit(
+        'create',
+        'task',
+        savedTask.id,
+        userId,
+        createTaskDto,
+      );
+
+      return savedTask;
     } catch (error) {
       console.error('Error creating task:', error.message);
       throw new InternalServerErrorException('Error creating task in service');
@@ -73,7 +85,17 @@ export class TasksService {
       }
 
       Object.assign(task, updateTaskDto);
-      return await this.tasksRepository.save(task);
+      const updatedTask = await this.tasksRepository.save(task);
+
+      await this.auditService.createAudit(
+        'update',
+        'task',
+        id,
+        task.user.id,
+        updateTaskDto,
+      );
+
+      return updatedTask;
     } catch (error) {
       console.error('Error updating task:', error.message);
       throw new InternalServerErrorException('Error updating task in service');
@@ -91,6 +113,9 @@ export class TasksService {
       }
 
       await this.tasksRepository.remove(task);
+
+      await this.auditService.createAudit('delete', 'task', id, task.user.id);
+
       return { message: `Task with ID ${id} was successfully deleted`, task };
     } catch (error) {
       console.error('Error deleting task:', error.message);

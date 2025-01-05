@@ -32,6 +32,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { typeOrmConfig } from './config/typeorm.config';
 import { mongooseConfig } from './config/mongoose.config';
 import { TestModule } from './tasks/test.module';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { TestModule } from './tasks/test.module';
     UsersModule,
     TasksModule,
     TestModule,
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],
