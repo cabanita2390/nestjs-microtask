@@ -11,7 +11,7 @@ import { UsersModule } from 'src/users/users.module';
     forwardRef(() => UsersModule), // Usar forwardRef para evitar la dependencia circular
     PassportModule,
     JwtModule.register({
-      secret: 'your_jwt_secret', // Cambia esto por una clave secreta más segura
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '60m' },
     }),
   ],

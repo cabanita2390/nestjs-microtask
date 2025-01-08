@@ -47,10 +47,6 @@ MicroTask Manager es un sistema de gestión de tareas desarrollado utilizando Ne
    npm install
    ```
 
-   ```
-
-   ```
-
 3. Configura las variables de entorno en el archivo .env
 
 ## Ejemplo de configuración
