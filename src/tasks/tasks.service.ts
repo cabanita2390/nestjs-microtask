@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Injectable,
   NotFoundException,
@@ -11,6 +12,8 @@ import { UpdateTaskDto } from './interfaces/update-task.dto';
 import { User } from '../users/entities/user.entity';
 import { AuditService } from 'src/audit/audit.service';
 
+type UserWithoutPassword = Omit<User, 'password'>;
+
 @Injectable()
 export class TasksService {
   constructor(
@@ -21,7 +24,10 @@ export class TasksService {
     private auditService: AuditService,
   ) {}
 
-  async create(createTaskDto: CreateTaskDto, userId: string): Promise<Task> {
+  async create(
+    createTaskDto: CreateTaskDto,
+    userId: string,
+  ): Promise<Task & { user: UserWithoutPassword }> {
     try {
       const user = await this.usersRepository.findOne({
         where: { id: userId },
@@ -41,7 +47,12 @@ export class TasksService {
         createTaskDto,
       );
 
-      return savedTask;
+      // Excluir la contraseña del usuario en la respuesta
+      const { password, ...userWithoutPassword } = user;
+      const response = { ...savedTask, user: userWithoutPassword } as Task & {
+        user: UserWithoutPassword;
+      };
+      return response;
     } catch (error) {
       console.error('Error creating task:', error.message);
       throw new InternalServerErrorException('Error creating task in service');
@@ -71,6 +82,22 @@ export class TasksService {
         throw error;
       }
       throw new InternalServerErrorException('Error fetching task');
+    }
+  }
+
+  async findAllFromUser(userId: string): Promise<Task[]> {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { id: userId },
+        relations: ['tasks'],
+      });
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+      return user.tasks;
+    } catch (error) {
+      console.error('Error fetching tasks for user:', error.message);
+      throw new InternalServerErrorException('Error fetching tasks for user');
     }
   }
 
