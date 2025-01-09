@@ -56,8 +56,8 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard, SelfGuard)
+  @Roles(Role.Admin, Role.User)
   @ApiOperation({ summary: 'Get a user by ID' })
   @ApiResponse({ status: 200, description: 'Return the user.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })

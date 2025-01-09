@@ -9,14 +9,12 @@ export const typeOrmConfig = {
     configService: ConfigService,
   ): Promise<TypeOrmModuleOptions> => ({
     type: 'postgres',
-    host: configService.get<string>('DB_HOST'),
-    port: configService.get<number>('DB_PORT'),
-    username: configService.get<string>('DB_USERNAME'),
-    password: configService.get<string>('DB_PASSWORD'),
-    database: configService.get<string>('DB_DATABASE'),
+    url: configService.get<string>('DATABASE_URL'), // Usar la URL desde el archivo .env
     autoLoadEntities: true,
     synchronize: true, // Solo para desarrollo
-    dropSchema: false, // Eliminar el esquema en cada inicialización
-    logging: false, // Habilitar logs
+    logging: true,
+    ssl: {
+      rejectUnauthorized: false, // Necesario para Render
+    },
   }),
 };

@@ -38,7 +38,8 @@ import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
+      isGlobal: true, // Hacer que las variables estén disponibles globalmente
+      envFilePath: '.env', // Ruta al archivo de entorno
     }),
     TypeOrmModule.forRootAsync(typeOrmConfig),
     MongooseModule.forRoot(mongooseConfig.uri),
