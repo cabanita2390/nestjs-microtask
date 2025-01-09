@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -100,7 +101,11 @@ export class UsersController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<RemoveUserResponse> {
-    return this.usersService.remove(id);
+  async remove(
+    @Param('id') id: string,
+    @Request() req: any,
+  ): Promise<RemoveUserResponse> {
+    const currentUser = req.user;
+    return this.usersService.remove(id, currentUser);
   }
 }
