@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -62,18 +64,11 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User> {
-    try {
-      const user = await this.usersRepository.findOne({ where: { id } });
-      if (!user) {
-        throw new NotFoundException(`User with ID ${id} not found`);
-      }
-      return user;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Error fetching user');
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
+    return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
@@ -95,35 +90,32 @@ export class UsersService {
     }
   }
 
-  async remove(id: string): Promise<RemoveUserResponse> {
-    if (!isUUID(id)) {
-      throw new BadRequestException('Invalid UUID');
-    }
-
+  async remove(
+    id: string,
+    currentUser: { id: string; role: string },
+  ): Promise<RemoveUserResponse> {
     const user = await this.usersRepository.findOne({ where: { id } });
+
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    try {
-      await this.usersRepository.delete(id);
-      return { message: `User with ID ${id} was successfully deleted`, user };
-    } catch (error) {
-      console.error('Error deleting user:', error.message);
-      throw new InternalServerErrorException('Error deleting user in service');
+    if (currentUser.role !== 'admin' && currentUser.id !== id) {
+      throw new ForbiddenException(
+        'You do not have permission to delete this user',
+      );
     }
+
+    await this.usersRepository.delete(id);
+    return { message: `User with ID ${id} was successfully deleted`, user };
   }
 
   async findByEmail(email: string): Promise<User> {
-    try {
-      const user = await this.usersRepository.findOne({ where: { email } });
-      if (!user) {
-        throw new NotFoundException(`User with email ${email} not found`);
-      }
-      return user;
-    } catch (error) {
-      console.error('Error finding user by email:', error.message);
-      throw new InternalServerErrorException('Error finding user by email');
-    }
+  const user = await this.usersRepository.findOne({ where: { email } });
+  if (!user) {
+    throw new NotFoundException(`User with email ${email} not found`);
   }
+  return user;
+}
+
 }
