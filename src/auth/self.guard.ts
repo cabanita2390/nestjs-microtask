@@ -10,7 +10,9 @@ export class SelfGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
+    console.log('user en self.guard.ts: ', user);
     const userId = request.params.id;
+    console.log('userId en self.guard.ts: ', userId);
 
     if (user.role === 'admin') {
       return true;
